@@ -20,7 +20,7 @@ import sys
 
 def setup(rank, world_size):
     """Set up the environment for distributed training."""
-    os.environ['MASTER_ADDR'] = '10.182.0.2'  # Master IP Address
+    os.environ['MASTER_ADDR'] = '10.182.0.3'  # Master IP Address
     os.environ['MASTER_PORT'] = '49152'  # Master Port
     dist.init_process_group("nccl", rank=rank, world_size=world_size)
     torch.cuda.set_device(rank)
@@ -49,7 +49,7 @@ def main(rank, world_size):
         val_loader = get_preloaded_data_loaders(val_data, apply_augmentations=False, shuffle=False, rank=rank, world_size=world_size)
 
         model_type = "SNN" if config["model_config"]["use_snn"] else "CNN"
-        model = SNN().to(rank) if config["model_config"]["use_snn"] else CRNN().to(rank)
+        model = SNN().to(rank) if config["model_config"]["use_snn"] else SNN().to(rank)
         model = DDP(model, device_ids=[rank])
 
         if not model:

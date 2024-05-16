@@ -33,13 +33,6 @@ config = {
             "order_input": 1,
             "t_design_degree": 3,
             "order_output": 1,
-            "g_type": ["spherical_cap", "hard"],
-            "g_values": None,
-            "T_pseudo_floor": 1e-8,
-            "backend": "basic",
-            "w_pattern": "hypercardioid",
-            "use_slepian": True,
-            "save_plots": False,
         },
         
         "apply_spherical_rotation": False,
