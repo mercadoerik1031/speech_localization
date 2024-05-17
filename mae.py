@@ -25,7 +25,7 @@ def angular_distance(v1, v2):
 
 
 
-def calc_median_angular_error(t_azimuth, t_elevation, p_azimuth, p_elevation):
+def calc_angular_errors(t_azimuth, t_elevation, p_azimuth, p_elevation):
     """Calculate the median angular error between true and predicted angles."""
     # Convert angles to Cartesian coordinates
     t_cartesian = to_cartesian(t_azimuth, t_elevation)
@@ -34,7 +34,5 @@ def calc_median_angular_error(t_azimuth, t_elevation, p_azimuth, p_elevation):
     ang_dist_rad = angular_distance(t_cartesian, p_cartesian)
     # Convert angular distance from radians to degrees
     ang_dist_deg = torch.rad2deg(ang_dist_rad)
-    # Calculate median angular error in degrees
-    
     
     return ang_dist_deg

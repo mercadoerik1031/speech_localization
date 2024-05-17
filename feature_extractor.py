@@ -18,7 +18,7 @@ class FeatureExtractor():
             self.mel_filter = librosa.filters.mel(sr=self.fs, n_fft=self.n_fft, n_mels=self.mel_bins, fmin=self.fmin)
 
     def log_mel_spectrogram(self, audio):
-        # Assuming audio is of shape [channels, samples]
+        # audio is of shape [channels, samples]
         channel_features = []
         for i in range(audio.shape[0]):  # iterate over each channel
             S = np.abs(librosa.stft(y=audio[i], 
@@ -89,7 +89,7 @@ class FeatureExtractor():
                             pad_mode='reflect')
         
         # Constants for intensity calculations
-        # Assuming `rho` (air density) and `c` (speed of sound) need to be defined
+        # `rho` (air density) and `c` (speed of sound)
         rho = config.get('rho', 1.21)  # example value in kg/m^3
         c = config.get('c', 343)      # example value in m/s
         normalization_factor = -1 / (rho * c * np.sqrt(3))

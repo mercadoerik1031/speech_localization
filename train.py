@@ -7,10 +7,10 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.optim.lr_scheduler import CosineAnnealingLR
 
 from config import config
-from snn import SNN
-from cnn import CNN
-from crnn import CRNN
-from regularization import RegularizationScheduler
+from models.snn import SNN
+from models.srnn import SRNN
+from models.cnn import CNN
+from models.crnn import CRNN
 from dataloaders import get_preloaded_data_loaders
 from train_eval_func import train_func, evaluate_func
 from early_stopping import EarlyStopping
@@ -20,7 +20,7 @@ import sys
 
 def setup(rank, world_size):
     """Set up the environment for distributed training."""
-    os.environ['MASTER_ADDR'] = '10.182.0.3'  # Master IP Address
+    os.environ['MASTER_ADDR'] = '10.182.0.4'  # Master IP Address
     os.environ['MASTER_PORT'] = '49152'  # Master Port
     dist.init_process_group("nccl", rank=rank, world_size=world_size)
     torch.cuda.set_device(rank)
@@ -28,6 +28,18 @@ def setup(rank, world_size):
 def cleanup():
     """Clean up the distributed training environment."""
     dist.destroy_process_group()
+
+def get_model(model_type):
+    if model_type == "SNN":
+        return SNN()
+    elif model_type == "SRNN":
+        return SRNN()
+    elif model_type == "CNN":
+        return CNN()
+    elif model_type == "CRNN":
+        return CRNN()
+    else:
+        raise ValueError(f"Unknown model type: {model_type}")
 
 def main(rank, world_size):
     setup(rank, world_size)
@@ -48,8 +60,8 @@ def main(rank, world_size):
         train_loader = get_preloaded_data_loaders(train_data, apply_augmentations=True, shuffle=True, rank=rank, world_size=world_size)
         val_loader = get_preloaded_data_loaders(val_data, apply_augmentations=False, shuffle=False, rank=rank, world_size=world_size)
 
-        model_type = "SNN" if config["model_config"]["use_snn"] else "CNN"
-        model = SNN().to(rank) if config["model_config"]["use_snn"] else SNN().to(rank)
+        model_type = config["model_config"]["model_type"]
+        model = get_model(model_type).to(rank)
         model = DDP(model, device_ids=[rank])
 
         if not model:
@@ -72,16 +84,8 @@ def main(rank, world_size):
         loss_func = nn.MSELoss()
         optimizer = torch.optim.Adam(model.parameters(), 
                                      lr=config["training"]["learning_rate"], 
-                                     #weight_decay=config["training"]["l2_scheduler"]["init"]
+                                     #weight_decay=config["training"]["l2"]
                                      )
-        
-        # l2_scheduler = RegularizationScheduler(optimizer, 
-        #                                        init_weight_decay=config["training"]["l2_scheduler"]["init"], 
-        #                                        increase_factor=config["training"]["l2_scheduler"]["increase_factor"], 
-        #                                        decrease_factor=config["training"]["l2_scheduler"]["decrease_factor"], 
-        #                                        threshold=config["training"]["l2_scheduler"]["threshold"], 
-        #                                        patience=config["training"]["l2_scheduler"]["patience"], 
-        #                                        verbose=True if rank == 0 else False, )
         
         lr_scheduler = CosineAnnealingLR(optimizer, 
                                          T_max=config["training"]["lr_scheduler"]["t_max"], 
@@ -115,7 +119,6 @@ def main(rank, world_size):
                 
                 torch.cuda.empty_cache()  # Clear unused memory
 
-            #l2_scheduler.step(train_median, val_median)
             lr_scheduler.step()
 
     except KeyboardInterrupt:
