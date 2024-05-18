@@ -8,7 +8,7 @@ config = {
         "speech_path": "../data/speech",
         "noise_path": "../data/noise", # "../data/noise" | None
         "save_dir": "../data/preprocessed",
-        "model_path": "../pretrained_models/srnn_gcc_hilbert_32_58.pth",
+        "model_path": "../pretrained_models/srnn_gcc_hilbert_32_58.pth", # srnn_gcc_hilbert_32_58.pth
     },
     
     
@@ -41,7 +41,7 @@ config = {
         "num_workers": 16,
         "use_snn": True,
         "num_steps": 4,
-        "dropout_rates": [0.2, 0.2, 0.2, 0.5, 0.5, 0.5, 0.3, 0.2], # [0.2, 0.2, 0.2, 0.5, 0.5, 0.5, 0.3, 0.2]
+        "dropout_rates": [0.3, 0.25, 0.22, 0.6, 0.5, 0.55, 0.35, 0.2], # [0.2, 0.2, 0.2, 0.5, 0.5, 0.5, 0.3, 0.2]
         "thresholds": [1.0] * 8,
         "betas": [0.9] * 8,
         "features": "gcc_hilbert", # "hilbert_transform" | "log_mel_spectrogram" | "gcc_phat" | "active_reactive_intensities" | "gcc_hilbert"

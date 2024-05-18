@@ -1,7 +1,6 @@
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-import torch
 
 from config import config
 from utils import filter_data, split_data, load_and_preprocess_audio
@@ -101,18 +100,18 @@ def plot_short_time_hilbert(stht_foa, phase_foa, save_path):
 def plot_gcc_phat_delay(gcc_phat_features, save_path):
     num_pairs, n_fft, num_frames = gcc_phat_features.shape
     
-    plt.figure(figsize=(15, 5))
     for i in range(num_pairs):
+        plt.figure(figsize=(15, 5))
         delays = np.argmax(gcc_phat_features[i], axis=0) - (n_fft // 2)
         plt.plot(delays, label=f'Channel Pair {i + 1}')
-    
-    plt.xlabel('Frames')
-    plt.ylabel('Delay (samples)')
-    plt.legend()
-    plt.title('Estimated Time Delays from GCC-PHAT')
-    plt.tight_layout()
-    plt.savefig(save_path)
-    plt.close()
+        
+        plt.xlabel('Frames')
+        plt.ylabel('Delay (samples)')
+        plt.legend()
+        plt.title(f'Estimated Time Delays from GCC-PHAT - Channel Pair {i + 1}')
+        plt.tight_layout()
+        plt.savefig(f'{save_path}_channel_pair_{i + 1}.png')
+        plt.close()
 
 def main():
     # Load a sample from the dataset
