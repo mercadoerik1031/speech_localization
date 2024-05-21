@@ -12,7 +12,7 @@ config = {
         "speech_path": "../data/speech",
         "noise_path": "../data/noise", # "../data/noise" | None
         "save_dir": "../data/preprocessed",
-        "model_path": "best_model.pth", # srnn_gcc_hilbert_32_58.pth ../pretrained_models/cnn_gcc_hilbert_20_46.pth
+        "model_path": "../pretrained_models/cnn_gcc_hilbert_20_46.pth", # srnn_gcc_hilbert_32_58.pth ../pretrained_models/cnn_gcc_hilbert_20_46.pth
     },
     
     
