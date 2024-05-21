@@ -6,7 +6,6 @@ from config import config
 from utils import filter_data, split_data, load_and_preprocess_audio
 from feature_extractor import FeatureExtractor
 
-# Ensure the 'plots' directory exists
 if not os.path.exists('plots'):
     os.makedirs('plots')
 

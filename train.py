@@ -20,8 +20,8 @@ import sys
 
 def setup(rank, world_size):
     """Set up the environment for distributed training."""
-    os.environ['MASTER_ADDR'] = '10.182.0.4'  # Master IP Address
-    os.environ['MASTER_PORT'] = '49152'  # Master Port
+    os.environ['MASTER_ADDR'] = config["env"]["ip"]  # Master IP Address
+    os.environ['MASTER_PORT'] = config["env"]["port"]  # Master Port
     dist.init_process_group("nccl", rank=rank, world_size=world_size)
     torch.cuda.set_device(rank)
 
@@ -76,7 +76,7 @@ def main(rank, world_size):
                 state_dict = torch.load(model_path, map_location=lambda storage, loc: storage.cuda(rank))
                 new_state_dict = {f'module.{k}' if not k.startswith('module.') else k: v for k, v in state_dict.items()}
                 model.load_state_dict(new_state_dict)
-                print(f"Loaded {model_path} for further training\n")
+                print(f"Loaded {os.path.basename(model_path)} for further training\n")
             else:
                 print(f"{model_path} Not Found... Restarting Training...\n")
                 
