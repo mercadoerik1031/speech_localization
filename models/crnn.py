@@ -33,7 +33,7 @@ class CRNN(nn.Module):
         self._init_feature_size()
 
         # Bidirectional GRU layers
-        self.hidden_size = 256  # 128
+        self.hidden_size = 128
         self.gru = nn.GRU(
             input_size=self.feature_size,
             hidden_size=self.hidden_size,
