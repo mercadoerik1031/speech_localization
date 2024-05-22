@@ -2,42 +2,15 @@ import os
 import traceback
 import torch
 import torch.nn as nn
-import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
 
 from config import config
-from models.snn import SNN
-from models.srnn import SRNN
-from models.cnn import CNN
-from models.crnn import CRNN
 from dataloaders import get_preloaded_data_loaders
 from train_eval_func import evaluate_func
 from utils import filter_data, split_data
+from train import setup, cleanup, get_model
 
 import sys
-
-def setup(rank, world_size):
-    """Set up the environment for distributed training."""
-    os.environ['MASTER_ADDR'] = config["env"]["ip"]  # Master IP Address
-    os.environ['MASTER_PORT'] = config["env"]["port"]  # Master Port
-    dist.init_process_group("nccl", rank=rank, world_size=world_size)
-    torch.cuda.set_device(rank)
-
-def cleanup():
-    """Clean up the distributed training environment."""
-    dist.destroy_process_group()
-
-def get_model(model_type):
-    if model_type == "SNN":
-        return SNN()
-    elif model_type == "SRNN":
-        return SRNN()
-    elif model_type == "CNN":
-        return CNN()
-    elif model_type == "CRNN":
-        return CRNN()
-    else:
-        raise ValueError(f"Unknown model type: {model_type}")
 
 def main(rank, world_size):
     try:
@@ -46,7 +19,7 @@ def main(rank, world_size):
         data = filter_data()
         _, _, test_data = split_data(data)
 
-        test_loader = get_preloaded_data_loaders(test_data, apply_augmentations=False, shuffle=False, rank=rank, world_size=world_size)
+        test_loader = get_preloaded_data_loaders(test_data, shuffle=False, rank=rank, world_size=world_size)
 
         model_type = config["model_config"]["model_type"]
         model = get_model(model_type).to(rank)

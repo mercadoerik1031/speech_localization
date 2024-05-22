@@ -57,8 +57,8 @@ def main(rank, world_size):
             print("Training or validation data sets are empty.")
             return
 
-        train_loader = get_preloaded_data_loaders(train_data, apply_augmentations=True, shuffle=True, rank=rank, world_size=world_size)
-        val_loader = get_preloaded_data_loaders(val_data, apply_augmentations=False, shuffle=False, rank=rank, world_size=world_size)
+        train_loader = get_preloaded_data_loaders(train_data, shuffle=True, rank=rank, world_size=world_size)
+        val_loader = get_preloaded_data_loaders(val_data, shuffle=False, rank=rank, world_size=world_size)
 
         model_type = config["model_config"]["model_type"]
         model = get_model(model_type).to(rank)

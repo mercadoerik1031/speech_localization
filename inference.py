@@ -1,44 +1,16 @@
 import os
 import time
 import torch
-import torch.nn as nn
-import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel as DDP
 
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 
 from config import config
-from models.snn import SNN
-from models.srnn import SRNN
-from models.cnn import CNN
-from models.crnn import CRNN
 from dataloaders import get_preloaded_data_loaders
 from utils import filter_data, split_data
-
-def setup(rank, world_size):
-    """Set up the environment for distributed training."""
-    os.environ['MASTER_ADDR'] = '127.0.0.1'  # Master IP Address
-    os.environ['MASTER_PORT'] = '29500'  # Master Port
-    dist.init_process_group("nccl", rank=rank, world_size=world_size)
-    torch.cuda.set_device(rank)
-
-def cleanup():
-    """Clean up the distributed training environment."""
-    dist.destroy_process_group()
-
-def get_model(model_type):
-    if model_type == "SNN":
-        return SNN()
-    elif model_type == "SRNN":
-        return SRNN()
-    elif model_type == "CNN":
-        return CNN()
-    elif model_type == "CRNN":
-        return CRNN()
-    else:
-        raise ValueError(f"Unknown model type: {model_type}")
+from mae import calc_angular_errors, to_cartesian
+from train import get_model, setup, cleanup
 
 def count_parameters(model):
     """Count the number of parameters in the model."""
@@ -61,7 +33,7 @@ def run_inference(rank, world_size, model_type, output_dir):
         "CNN": "/home/erikmercado1031/pretrained_models/cnn_gcc_hilbert_20_46.pth",
         "CRNN": "/home/erikmercado1031/pretrained_models/crnn_gcc_hilbert_21_37.pth",
         "SNN": "/home/erikmercado1031/pretrained_models/snn_gcc_hilbert_32_66.pth",
-        "SRNN": "/home/erikmercado1031/pretrained_models/srnn_gcc_hilbert_32_58.pth"
+        "SRNN": "/home/erikmercado1031/pretrained_models/srnn_gcc_hilbert_32_06.pth"
     }
 
     if rank == 0:
@@ -107,36 +79,6 @@ def aggregate_results(output_dir, model_types):
         model_results = torch.load(os.path.join(output_dir, f"{model_type}_results.pth"))
         results[model_type] = model_results
     return results
-
-def to_cartesian(azimuth, elevation):
-    """Convert azimuth and elevation angles to Cartesian coordinates."""
-    x = np.cos(elevation) * np.cos(azimuth)
-    y = np.cos(elevation) * np.sin(azimuth)
-    z = np.sin(elevation)
-    return np.stack((x, y, z), axis=-1)
-
-def angular_distance(v1, v2):
-    """Calculate the angular distance between two vectors."""
-    # Ensure the vectors are normalized
-    v1_norm = v1 / (np.linalg.norm(v1, axis=-1, keepdims=True) + 1e-6)
-    v2_norm = v2 / (np.linalg.norm(v2, axis=-1, keepdims=True) + 1e-6)
-    # Use dot product to find the cosine of the angle between vectors
-    cos_angle = np.sum(v1_norm * v2_norm, axis=-1)
-    cos_angle = np.clip(cos_angle, -1, 1)  # Clamp for numerical stability
-    # Calculate the angle in radians
-    angle_rad = np.arccos(cos_angle)
-    return angle_rad
-
-def calc_angular_errors(t_azimuth, t_elevation, p_azimuth, p_elevation):
-    """Calculate the angular errors between true and predicted angles."""
-    # Convert angles to Cartesian coordinates
-    t_cartesian = to_cartesian(t_azimuth, t_elevation)
-    p_cartesian = to_cartesian(p_azimuth, p_elevation)
-    # Calculate the angular distance in radians
-    ang_dist_rad = angular_distance(t_cartesian, p_cartesian)
-    # Convert angular distance from radians to degrees
-    ang_dist_deg = np.rad2deg(ang_dist_rad)
-    return ang_dist_deg
 
 def plot_results(results_path, num_samples=10):
     results = torch.load(results_path)

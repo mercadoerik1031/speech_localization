@@ -124,7 +124,7 @@ class FeatureExtractor():
     def combine_features(self, audio):
         # Extract features from the same audio signal
         gcc_features = self.gcc_phat(audio)
-        _, hilbert_features = self.compute_short_time_hilbert(audio)  # Assuming this returns phase directly
+        _, hilbert_features = self.compute_short_time_hilbert(audio)
 
         # Determine the target size for alignment
         target_shape = min(gcc_features.shape[2], hilbert_features.shape[2])

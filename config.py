@@ -1,10 +1,9 @@
-import numpy as np
 import torch
 
 
 config = {
     "env":{
-        "ip": "10.182.0.5",
+        "ip": "10.182.0.6",
         "port": "49152"},
     
     "paths": {
@@ -12,7 +11,7 @@ config = {
         "speech_path": "../data/speech",
         "noise_path": "../data/noise", # "../data/noise" | None
         "save_dir": "../data/preprocessed",
-        "model_path": "../pretrained_models/cnn_gcc_hilbert_20_46.pth", # srnn_gcc_hilbert_32_58.pth ../pretrained_models/cnn_gcc_hilbert_20_46.pth
+        "model_path": "../pretrained_models/best_model.pth", # cnn_gcc_hilbert_20_46.pth | crnn_gcc_hilbert_21_37.pth | snn_gcc_hilbert_32_66 | srnn_gcc_hilbert_32_58.pth
     },
     
     
@@ -30,23 +29,13 @@ config = {
     },
     
     
-    "data_augmentation": {
-        "apply_directional_loudness": True,
-        "directional_loudness_params": {
-            "order_input": 1,
-            "t_design_degree": 6,
-            "order_output": 1,
-        },
-    },
-    
-    
     "model_config": {
         "batch_size": 32,
         "num_workers": 16,
         "use_snn": False,
-        "model_type": "CNN", # "CNN", "CRNN", "SNN", "SRNN"
+        "model_type": "CRNN", # "CNN", "CRNN", "SNN", "SRNN"
         "num_steps": 4,
-        "dropout_rates": [0.3, 0.25, 0.22, 0.6, 0.5, 0.55, 0.35, 0.2], # [0.2, 0.2, 0.2, 0.5, 0.5, 0.5, 0.3, 0.2]
+        "dropout_rates": [0.2, 0.2, 0.2, 0.5, 0.5, 0.5, 0.3, 0.2], # [0.2, 0.2, 0.2, 0.5, 0.5, 0.5, 0.3, 0.2]
         "thresholds": [1.0] * 8,
         "betas": [0.9] * 8,
         "features": "gcc_hilbert", # "hilbert_transform" | "log_mel_spectrogram" | "gcc_phat" | "active_reactive_intensities" | "gcc_hilbert"
