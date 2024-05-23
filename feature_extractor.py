@@ -14,26 +14,9 @@ class FeatureExtractor():
         self.fmin = config["audio_processing"]["f_min"]
         self.window = config["audio_processing"]["window"]
         self.features = config["model_config"]["features"]
-        if "log_mel_spectrogram" in self.features:
-            self.mel_filter = librosa.filters.mel(sr=self.fs, n_fft=self.n_fft, n_mels=self.mel_bins, fmin=self.fmin)
+        # if "log_mel_spectrogram" in self.features:
+        #     self.mel_filter = librosa.filters.mel(sr=self.fs, n_fft=self.n_fft, n_mels=self.mel_bins, fmin=self.fmin)
 
-    def log_mel_spectrogram(self, audio):
-        # audio is of shape [channels, samples]
-        channel_features = []
-        for i in range(audio.shape[0]):  # iterate over each channel
-            S = np.abs(librosa.stft(y=audio[i], 
-                                    n_fft=self.n_fft, 
-                                    hop_length=self.hop_length, 
-                                    window=self.window,
-                                    pad_mode='reflect')) ** 2
-            mel_spectrogram = np.dot(self.mel_filter, S).T
-            log_mel_spectrogram = librosa.power_to_db(mel_spectrogram, ref=1.0, amin=1e-10, top_db=None)
-            channel_features.append(log_mel_spectrogram)
-        # Stack along a new dimension to keep channels separate
-        log_mel_spectrograms = np.stack(channel_features, axis=0)
-        return log_mel_spectrograms
-    
-    
     def gcc_phat(self, audio):
         gcc_phat_features = []
         for i in range(audio.shape[0]):
@@ -75,51 +58,6 @@ class FeatureExtractor():
                 phase_foa[channel, :, i] = np.angle(stht_foa[channel, :, i])
 
         return stht_foa, phase_foa
-    
-    
-    def intensities(self, audio):
-        # Ensure audio has the correct shape [channels, samples]
-        if audio.shape[0] != 4:
-            raise ValueError("Audio must have exactly 4 channels for FOA intensity calculations.")
-
-        stft = librosa.stft(y=audio, 
-                            n_fft=self.n_fft, 
-                            hop_length=self.hop_length, 
-                            window=self.window, 
-                            pad_mode='reflect')
-        
-        # Constants for intensity calculations
-        # `rho` (air density) and `c` (speed of sound)
-        rho = config.get('rho', 1.21)  # example value in kg/m^3
-        c = config.get('c', 343)      # example value in m/s
-        normalization_factor = -1 / (rho * c * np.sqrt(3))
-        
-        # Decompose the STFT output to get pressure and particle velocity components
-        p = stft[0, :]  # pressure (W channel)
-        vx = stft[1, :] * normalization_factor  # particle velocity x (X channel)
-        vy = stft[2, :] * normalization_factor  # particle velocity y (Y channel)
-        vz = stft[3, :] * normalization_factor  # particle velocity z (Z channel)
-        
-        # Calculate the conjugate of pressure
-        p_star = np.conj(p)
-        
-        # Calculate active intensities
-        Ia_x = np.real(p_star * vx)
-        Ia_y = np.real(p_star * vy)
-        Ia_z = np.real(p_star * vz)
-        
-        # Calculate reactive intensities
-        Ir_x = np.imag(p_star * vx)
-        Ir_y = np.imag(p_star * vy)
-        Ir_z = np.imag(p_star * vz)
-        
-        # Stack active and reactive intensity components
-        Ia = np.stack((Ia_x, Ia_y, Ia_z), axis=0)
-        Ir = np.stack((Ir_x, Ir_y, Ir_z), axis=0)
-        
-        # Concatenate active and reactive intensities
-        intensities = np.concatenate((Ia, Ir), axis=0)
-        return intensities
     
     def combine_features(self, audio):
         # Extract features from the same audio signal
@@ -186,3 +124,70 @@ class FeatureExtractor():
             
 
         return np.concatenate(features, axis=0)
+    
+    
+    """
+    Unused features that were experimented with.
+    
+    
+    def intensities(self, audio):
+        # Ensure audio has the correct shape [channels, samples]
+        if audio.shape[0] != 4:
+            raise ValueError("Audio must have exactly 4 channels for FOA intensity calculations.")
+
+        stft = librosa.stft(y=audio, 
+                            n_fft=self.n_fft, 
+                            hop_length=self.hop_length, 
+                            window=self.window, 
+                            pad_mode='reflect')
+        
+        # Constants for intensity calculations
+        # `rho` (air density) and `c` (speed of sound)
+        rho = config.get('rho', 1.21)  # example value in kg/m^3
+        c = config.get('c', 343)      # example value in m/s
+        normalization_factor = -1 / (rho * c * np.sqrt(3))
+        
+        # Decompose the STFT output to get pressure and particle velocity components
+        p = stft[0, :]  # pressure (W channel)
+        vx = stft[1, :] * normalization_factor  # particle velocity x (X channel)
+        vy = stft[2, :] * normalization_factor  # particle velocity y (Y channel)
+        vz = stft[3, :] * normalization_factor  # particle velocity z (Z channel)
+        
+        # Calculate the conjugate of pressure
+        p_star = np.conj(p)
+        
+        # Calculate active intensities
+        Ia_x = np.real(p_star * vx)
+        Ia_y = np.real(p_star * vy)
+        Ia_z = np.real(p_star * vz)
+        
+        # Calculate reactive intensities
+        Ir_x = np.imag(p_star * vx)
+        Ir_y = np.imag(p_star * vy)
+        Ir_z = np.imag(p_star * vz)
+        
+        # Stack active and reactive intensity components
+        Ia = np.stack((Ia_x, Ia_y, Ia_z), axis=0)
+        Ir = np.stack((Ir_x, Ir_y, Ir_z), axis=0)
+        
+        # Concatenate active and reactive intensities
+        intensities = np.concatenate((Ia, Ir), axis=0)
+        return intensities
+    
+    def log_mel_spectrogram(self, audio):
+        # audio is of shape [channels, samples]
+        channel_features = []
+        for i in range(audio.shape[0]):  # iterate over each channel
+            S = np.abs(librosa.stft(y=audio[i], 
+                                    n_fft=self.n_fft, 
+                                    hop_length=self.hop_length, 
+                                    window=self.window,
+                                    pad_mode='reflect')) ** 2
+            mel_spectrogram = np.dot(self.mel_filter, S).T
+            log_mel_spectrogram = librosa.power_to_db(mel_spectrogram, ref=1.0, amin=1e-10, top_db=None)
+            channel_features.append(log_mel_spectrogram)
+        # Stack along a new dimension to keep channels separate
+        log_mel_spectrograms = np.stack(channel_features, axis=0)
+        return log_mel_spectrograms
+    """
+    

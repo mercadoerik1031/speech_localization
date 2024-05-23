@@ -80,6 +80,92 @@ def aggregate_results(output_dir, model_types):
         results[model_type] = model_results
     return results
 
+# def plot_results(results_path, num_samples=10):
+#     results = torch.load(results_path)
+#     output_dir = "plots"
+#     os.makedirs(output_dir, exist_ok=True)
+
+#     # Colors for different models
+#     colors = {
+#         "CNN": "r",
+#         "CRNN": "g",
+#         "SNN": "b",
+#         "SRNN": "c"
+#     }
+
+#     # Calculate median errors and find samples closest to these median errors
+#     errors_dict = {}
+#     median_errors = {}
+#     avg_inference_times = {}
+#     num_parameters = {}
+#     for model_type, result in results.items():
+#         outputs = np.concatenate(result['outputs'], axis=0)
+#         labels = np.concatenate(result['labels'], axis=0)
+#         azimuth_gt, elevation_gt = labels[:, 0], labels[:, 1]
+#         azimuth_pred, elevation_pred = outputs[:, 0], outputs[:, 1]
+#         errors = calc_angular_errors(azimuth_gt, elevation_gt, azimuth_pred, elevation_pred)
+#         errors_dict[model_type] = np.array(errors).astype(float)  # Ensure errors are float type
+#         median_errors[model_type] = float(np.median(errors))
+#         avg_inference_times[model_type] = result['avg_inference_time']
+#         num_parameters[model_type] = result['num_parameters']
+#         print(f"{model_type} median error: {median_errors[model_type]}")
+#         print(f"{model_type} average inference time: {avg_inference_times[model_type]:.4f} seconds per batch")
+#         print(f"{model_type} number of parameters: {num_parameters[model_type]}")
+
+#     # Ensure that both errors and median_errors are float type
+#     for model_type in errors_dict.keys():
+#         errors_dict[model_type] = np.array(errors_dict[model_type]).astype(float)
+#         median_errors[model_type] = float(median_errors[model_type])
+
+#     # Find the samples where all models are within ±5 degrees of their median error
+#     common_samples = []
+#     for idx in range(len(errors_dict["CNN"])):
+#         within_threshold = all(
+#             np.abs(errors_dict[model_type][idx] - median_errors[model_type]) <= 5
+#             for model_type in model_types
+#         )
+#         if within_threshold:
+#             common_samples.append(idx)
+
+#     # Limit to the specified number of samples
+#     common_samples = common_samples[:num_samples]
+
+#     # Create plots for the samples where all models are within ±5 degrees of their median error
+#     for sample_idx in common_samples:
+#         fig = plt.figure(figsize=(12, 8))
+#         ax = fig.add_subplot(111, projection='3d')
+
+#         labels = np.concatenate(list(results.values())[0]['labels'], axis=0)
+#         ground_truth = labels[sample_idx]  # Get ground truth for the sample index
+
+#         azimuth_gt, elevation_gt = ground_truth
+#         x_gt, y_gt, z_gt = to_cartesian(azimuth_gt, elevation_gt)
+#         ax.scatter(x_gt, y_gt, z_gt, c='k', marker='o', s=100, label='Ground Truth')
+#         ax.scatter(0, 0, 0, c='m', marker='x', s=100, label='Reference Point (Center of Room)')
+
+#         for model_type in model_types:
+#             outputs = np.concatenate(results[model_type]['outputs'], axis=0)
+#             avg_inference_time = results[model_type]['avg_inference_time']
+#             azimuth_pred, elevation_pred = outputs[sample_idx]
+#             x_pred, y_pred, z_pred = to_cartesian(azimuth_pred, elevation_pred)
+#             error = calc_angular_errors(np.array([azimuth_gt]), np.array([elevation_gt]), np.array([azimuth_pred]), np.array([elevation_pred]))[0]
+
+#             ax.scatter(x_pred, y_pred, z_pred, c=colors[model_type], marker='^', s=100, label=f'{model_type} Prediction ({error:.2f}°) - Avg Inf Time: {avg_inference_time:.4f}s')
+
+#         ax.set_xlabel('X-axis')
+#         ax.set_ylabel('Y-axis')
+#         ax.set_zlabel('Z-axis')
+#         ax.set_xlim(-1, 1)
+#         ax.set_ylim(-1, 1)
+#         ax.set_zlim(-1, 1)
+
+#         ax.set_title(f'Sample ID: {sample_idx}')
+#         ax.legend(loc='upper left', bbox_to_anchor=(-0.4, 1), prop={'size': 9})  # Move the legend further left and make it smaller
+
+#         plt.savefig(os.path.join(output_dir, f'sample_{sample_idx}_results.png'))
+#         plt.close()
+
+
 def plot_results(results_path, num_samples=10):
     results = torch.load(results_path)
     output_dir = "plots"
@@ -103,7 +189,14 @@ def plot_results(results_path, num_samples=10):
         labels = np.concatenate(result['labels'], axis=0)
         azimuth_gt, elevation_gt = labels[:, 0], labels[:, 1]
         azimuth_pred, elevation_pred = outputs[:, 0], outputs[:, 1]
-        errors = calc_angular_errors(azimuth_gt, elevation_gt, azimuth_pred, elevation_pred)
+        
+        # Convert numpy arrays to torch tensors
+        azimuth_gt_tensor = torch.tensor(azimuth_gt)
+        elevation_gt_tensor = torch.tensor(elevation_gt)
+        azimuth_pred_tensor = torch.tensor(azimuth_pred)
+        elevation_pred_tensor = torch.tensor(elevation_pred)
+
+        errors = calc_angular_errors(azimuth_gt_tensor, elevation_gt_tensor, azimuth_pred_tensor, elevation_pred_tensor)
         errors_dict[model_type] = np.array(errors).astype(float)  # Ensure errors are float type
         median_errors[model_type] = float(np.median(errors))
         avg_inference_times[model_type] = result['avg_inference_time']
@@ -132,25 +225,25 @@ def plot_results(results_path, num_samples=10):
 
     # Create plots for the samples where all models are within ±5 degrees of their median error
     for sample_idx in common_samples:
-        fig = plt.figure(figsize=(12, 8))
+        fig = plt.figure(figsize=(14, 10))  # Increase figure size
         ax = fig.add_subplot(111, projection='3d')
 
         labels = np.concatenate(list(results.values())[0]['labels'], axis=0)
         ground_truth = labels[sample_idx]  # Get ground truth for the sample index
 
         azimuth_gt, elevation_gt = ground_truth
-        x_gt, y_gt, z_gt = to_cartesian(azimuth_gt, elevation_gt)
-        ax.scatter(x_gt, y_gt, z_gt, c='k', marker='o', s=100, label='Ground Truth')
-        ax.scatter(0, 0, 0, c='m', marker='x', s=100, label='Reference Point (Center of Room)')
+        x_gt, y_gt, z_gt = to_cartesian(torch.tensor(azimuth_gt), torch.tensor(elevation_gt))
+        ax.scatter(x_gt, y_gt, z_gt, c='k', marker='o', s=200, label='Ground Truth')
+        ax.scatter(0, 0, 0, c='m', marker='x', s=200, label='Reference Point (Center of Room)')
 
         for model_type in model_types:
             outputs = np.concatenate(results[model_type]['outputs'], axis=0)
             avg_inference_time = results[model_type]['avg_inference_time']
             azimuth_pred, elevation_pred = outputs[sample_idx]
-            x_pred, y_pred, z_pred = to_cartesian(azimuth_pred, elevation_pred)
-            error = calc_angular_errors(np.array([azimuth_gt]), np.array([elevation_gt]), np.array([azimuth_pred]), np.array([elevation_pred]))[0]
+            x_pred, y_pred, z_pred = to_cartesian(torch.tensor(azimuth_pred), torch.tensor(elevation_pred))
+            error = calc_angular_errors(torch.tensor([azimuth_gt]), torch.tensor([elevation_gt]), torch.tensor([azimuth_pred]), torch.tensor([elevation_pred]))[0]
 
-            ax.scatter(x_pred, y_pred, z_pred, c=colors[model_type], marker='^', s=100, label=f'{model_type} Prediction ({error:.2f}°) - Avg Inf Time: {avg_inference_time:.4f}s')
+            ax.scatter(x_pred, y_pred, z_pred, c=colors[model_type], marker='^', s=200, label=f'{model_type} Prediction ({error:.2f}°) - Avg Inf Time: {avg_inference_time:.4f}s')
 
         ax.set_xlabel('X-axis')
         ax.set_ylabel('Y-axis')
@@ -159,11 +252,21 @@ def plot_results(results_path, num_samples=10):
         ax.set_ylim(-1, 1)
         ax.set_zlim(-1, 1)
 
-        ax.set_title(f'Sample ID: {sample_idx}')
-        ax.legend(loc='upper left', bbox_to_anchor=(-0.4, 1), prop={'size': 9})  # Move the legend further left and make it smaller
+        # Adjust legend placement and size
+        plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.15), ncol=2, fontsize=17)  # Place legend further above the plot and increase font size
+
+        # Adjust the top margin to make space for the legend and move the title down slightly
+        plt.subplots_adjust(top=0.8)
+        ax.set_title(f'Sample ID: {sample_idx}', y=1.25, fontsize=20)
 
         plt.savefig(os.path.join(output_dir, f'sample_{sample_idx}_results.png'))
         plt.close()
+
+
+
+
+
+
 
 if __name__ == "__main__":
     output_dir = "/home/erikmercado1031/speech_localization/results"

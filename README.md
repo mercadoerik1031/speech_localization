@@ -1,4 +1,4 @@
-# Comparative Analysis of Neural Network Architectures for Sound Source Localization using Spatial LibriSpeech Dataset
+# Sound Source Localization: The Neural Network Architecture Comparison
 
 ## Abstract
 
