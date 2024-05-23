@@ -31,33 +31,7 @@ class AudioDataset(Dataset):
     
     def __len__(self):
         return len(self.data)
-    
-    # def __getitem__(self, idx):
-    #     item = self.data[idx]
         
-    #     speech_audio = load_and_preprocess_audio(item["speech_path"], self.sr, self.start, self.duration)
-        
-    #     if item.get("noise_path") and item["split"] == "train":
-    #         noise_audio = load_and_preprocess_audio(item["noise_path"], self.sr, self.start, self.duration)
-    #         mixed_audio = speech_audio + self.noise_ratio * noise_audio
-    #     else:
-    #         mixed_audio = speech_audio
-            
-       
-    #     labels_array = np.stack([item['azimuth'], item['elevation']], axis=-1)           
-    #     features = self.feature_extractor.transform(mixed_audio)
-    #     norm_features = self.feature_extractor.normalize(features)
-        
-    #     if self.use_snn and self.encoding_type == "rate":
-    #         norm_features = torch.from_numpy(norm_features).float()
-    #         features_torch = spikegen.rate(norm_features, num_steps=self.num_steps)
-    #     else:
-    #         features_torch = torch.from_numpy(norm_features).float()
-            
-    #     # Ensure the labels_array has the shape (2,) and convert to tensor
-    #     labels_tensor = torch.from_numpy(labels_array).float().view(2)
-        
-    #     return features_torch, labels_tensor
     
     def __getitem__(self, idx):
         item = self.data[idx]
