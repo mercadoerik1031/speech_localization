@@ -109,12 +109,12 @@ The median angular error provides a robust measure of the average performance of
 
 The table below summarizes the performance of each model in terms of median angular error, average inference time per batch, and the number of parameters:
 
-| Model | Loss | Median Error (degrees) | Avg Inference Time (s) | Number of Parameters | Avg Time Per Epochs (min:sec) | Epochs Trained |
+| Model | Loss | Median Error (degrees) | Avg Inference Time (ms) | Number of Parameters | Avg Time Per Epochs (min:sec) | Epochs Trained |
 |-------|------|-------------------------|------------------------|----------------------|-------------------------------|----------------|
-| CNN   | 0.1186 | 20.47                  | 0.0094                 | 271,016,696          | 0.0                           | 0.0            |
-| CRNN  | 0.1408 | 21.37                  | 0.0051                 | 1,573,418            | 3:49                          | 24             |
-| SNN   | 0.6580 | 32.76                  | 0.0417                 | 271,000,422          | 0.0                           | 0.0            |
-| SRNN  | 0.5690 | 32.06                  | 0.0403                 | 271,000,430          | 0.0                           | 0.0            |
+| CNN   | 0.1186 | 20.47                  | 9.4                 | 271,016,696          | 3:20                           | 20            |
+| CRNN  | 0.1408 | 21.37                  | 5.1                 | 1,573,418            | 3:49                          | 24             |
+| SNN   | 0.6580 | 32.76                  | 41.7                 | 271,000,422          | 5:20                           | 30            |
+| SRNN  | 0.5690 | 32.06                  | 40.3                 | 271,000,430          | 5:22                           | 31            |
 
 ### Visualizations
 
