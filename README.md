@@ -13,7 +13,12 @@ Given the limitations of traditional SSL methods and the advancements in deep le
 Setup localhost
 
 ### Linux
-```hostname -I``
+```hostname -I```
+### Windows
+```ipconfig```
+### Mac
+```ipconfig getifaddr en0```
+
 
 ## Introduction
 
