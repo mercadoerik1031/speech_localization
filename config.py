@@ -3,8 +3,8 @@ import torch
 
 config = {
     "env":{
-        "ip": "10.182.0.6",
-        "port": "49152"},
+        "ip": "", # enter internal IP
+        "port": ""}, # enter port
     
     "paths": {
         "metadata_path": "../data/metadata.parquet",
