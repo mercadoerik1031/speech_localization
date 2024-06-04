@@ -13,8 +13,7 @@ Given the limitations of traditional SSL methods and the advancements in deep le
 Setup localhost
 
 ### Linux
-```bash
-hostname -I```
+```hostname -I``
 
 ## Introduction
 
