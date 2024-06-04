@@ -8,6 +8,14 @@ Historically, SSL methods have relied on signal processing techniques such as St
 
 Given the limitations of traditional SSL methods and the advancements in deep learning, this project aims to compare Convolutional Neural Networks (CNNs), Convolutional Recurrent Neural Networks (CRNNs), Spiking Neural Networks (SNNs), and Spiking Recurrent Neural Networks (SRNNs) models for speech localization. This comparative analysis builds on existing research, offering insights into the strengths and weaknesses of each model. By leveraging Apple's Spatial LibriSpeech Dataset, this study seeks to advance the understanding of neural network-based approaches for SSL and contribute to developing more effective auditory processing systems.
 
+## How to Run
+
+Setup localhost
+
+### Linux
+```bash
+hostname -I```
+
 ## Introduction
 
 Sound source localization (SSL) focuses on estimating the position of sound sources relative to a reference point, typically a microphone array. This estimation primarily involves determining the sound's direction of arrival (DoA), encompassing both azimuth and elevation angles. SSL is critical in numerous applications, including source separation, automatic speech recognition, speech enhancement, human-robot interaction, noise control, and room acoustic analysis.
