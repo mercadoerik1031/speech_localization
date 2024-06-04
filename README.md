@@ -10,16 +10,17 @@ Given the limitations of traditional SSL methods and the advancements in deep le
 
 ## How to Run
 
-Setup localhost for Pytorch Data Distributed Parallel. In ```config.py```, add the localhost IP and port.
+Libraries required ```librosa, soundfile, pytorch, snntorch, numpy, matplotlib, pandas```
 
-### Linux
-```hostname -I```
-### Windows
-```ipconfig```
-### Mac
-```ipconfig getifaddr en0```
+Setup localhost for Pytorch Data Distributed Parallel. In ```config.py```, add the localhost IP and port. For **Linux** use ```hostname -I``` for **Windows** use ```ipconfig``` and for **Mac** use ```ipconfig getifaddr en0```
 
-If a pre-trained model is needed, it can be downloaded [here](https://drive.google.com/drive/folders/1nzFnNFo2Ey4QjD4ljQZqz0sufNv-nuEm?usp=sharing). Ensure that the path and type of model (CNN | CRNN | SNN | SRNN) are added to ```config.py```. *if using a snn model ensure ```use_snn = True```*
+If a pre-trained model is needed, it can be downloaded [here](https://drive.google.com/drive/folders/1nzFnNFo2Ey4QjD4ljQZqz0sufNv-nuEm?usp=sharing). Ensure that the path and type of model (CNN | CRNN | SNN | SRNN) are added to ```config.py```. If using a snn model ensure ```use_snn = True```
+
+To train from scratch or continue training, run the command ```python train.py```
+
+To test the model, run the command ```python test.py```
+
+For inference run command ```python inference.py```
 
 
 ## Introduction
